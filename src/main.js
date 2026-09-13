@@ -25,7 +25,7 @@ init();
 
 async function init(){
   config = await fetch("./config/memes.json").then(r=>r.json());
-  showMeme(config.memes.find(m=>m.gesture===config.defaultGesture) || config.memes[0]);
+  clearReaction();
   bindKeys();
 
   try{
@@ -229,8 +229,20 @@ function commit(gesture,score,force=false){
   el.confidence.textContent=Math.round(score*100)+"%";
 }
 
+function clearReaction(){
+  el.caption.textContent="";
+  el.caption.classList.remove("is-visible");
+  el.memeImage.classList.remove("is-active","pop");
+  el.memeImage.removeAttribute("src");
+  el.memeVideo.pause();
+  el.memeVideo.classList.remove("is-active","pop");
+  el.memeVideo.removeAttribute("src");
+  el.memeVideo.load();
+}
+
 function showMeme(meme){
   el.caption.textContent=meme.label || "";
+  el.caption.classList.toggle("is-visible", Boolean(meme.label));
 
   el.memeImage.classList.remove("is-active","pop");
   el.memeVideo.classList.remove("is-active","pop");
