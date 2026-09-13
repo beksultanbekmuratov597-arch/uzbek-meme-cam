@@ -40,10 +40,21 @@ async function init(){
   requestAnimationFrame(loop);
 
   try{
+    el.status.textContent = "1/3 · MediaPipe JS yuklanmoqda…";
+
     const { FilesetResolver, HandLandmarker } = await import(
       "../node_modules/@mediapipe/tasks-vision/vision_bundle.mjs"
     );
+
+    el.status.textContent = "2/3 · WASM yuklanmoqda…";
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
+
+    el.status.textContent = "3/3 · Hand model yuklanmoqda…";
+    const modelResponse = await fetch(MODEL_URL, { cache: "force-cache" });
+    if(!modelResponse.ok){
+      throw new Error("Model HTTP " + modelResponse.status);
+    }
+    const modelBuffer = new Uint8Array(await modelResponse.arrayBuffer());
 
     const common = {
       runningMode:"VIDEO",
@@ -57,7 +68,7 @@ async function init(){
       landmarker = await HandLandmarker.createFromOptions(vision,{
         ...common,
         baseOptions:{
-          modelAssetPath:MODEL_URL,
+          modelAssetBuffer:modelBuffer,
           delegate:"GPU"
         }
       });
@@ -68,17 +79,19 @@ async function init(){
       landmarker = await HandLandmarker.createFromOptions(vision,{
         ...common,
         baseOptions:{
-          modelAssetPath:MODEL_URL
+          modelAssetBuffer:modelBuffer
         }
       });
 
       el.status.textContent = "Tayyor · CPU";
     }
+
+    el.hint.textContent = "Qo‘l ishorasini ko‘rsating";
   }catch(err){
     console.error("MediaPipe error:", err);
     const message = err?.message || String(err);
-    el.status.textContent = "Model xatosi";
-    el.hint.textContent = "MediaPipe: " + message.slice(0, 120);
+    el.status.textContent = "Model xatosi · " + message.slice(0, 70);
+    el.hint.textContent = "MediaPipe: " + message.slice(0, 150);
   }
 }
 
