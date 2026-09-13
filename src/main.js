@@ -8,7 +8,6 @@ const el = {
   overlay: document.querySelector("#overlay"),
   memeImage: document.querySelector("#memeImage"),
   memeVideo: document.querySelector("#memeVideo"),
-  caption: document.querySelector("#caption"),
   status: document.querySelector("#status"),
   gesture: document.querySelector("#gesture"),
   confidence: document.querySelector("#confidence"),
@@ -156,7 +155,7 @@ function classify(hands){
   if(hands.length>=2){
     const a=features(hands[0]);
     const b=features(hands[1]);
-    if(a.fist&&b.fist) return {gesture:"double_fist",score:.96};
+    if(a.closedFist&&b.closedFist) return {gesture:"double_fist",score:.98};
     if(a.openPalm&&b.openPalm) return {gesture:"palms_up",score:.95};
   }
 
@@ -164,13 +163,18 @@ function classify(hands){
   const f=features(hands[0]);
 
   if(f.pinch) return {gesture:"pinch",score:.97};
-  if(f.thumbUp) return {gesture:"thumbs_up",score:.96};
+
+  // Shaka must be checked before thumbs-up: both poses have an extended thumb.
+  if(!f.index&&!f.middle&&!f.ring&&f.pinky&&f.shakaThumb) {
+    return {gesture:"shaka",score:.97};
+  }
+
+  if(f.thumbUp&&!f.index&&!f.middle&&!f.ring&&!f.pinky) return {gesture:"thumbs_up",score:.96};
   if(f.index&&f.middle&&!f.ring&&!f.pinky) return {gesture:"peace",score:.95};
   if(f.index&&!f.middle&&!f.ring&&!f.pinky) return {gesture:"point",score:.94};
   if(f.index&&!f.middle&&!f.ring&&f.pinky) return {gesture:"rock",score:.93};
-  if(!f.index&&!f.middle&&!f.ring&&f.pinky&&f.thumb) return {gesture:"shaka",score:.93};
   if(f.openPalm) return {gesture:"open_palm",score:.92};
-  if(f.fist) return {gesture:"fist",score:.94};
+  if(f.closedFist) return {gesture:"fist",score:.95};
 
   return null;
 }
@@ -193,6 +197,7 @@ function features(lm){
   const thumbSpread=dist(lm[4],lm[5])/palm;
   const thumbReach=dist(lm[4],lm[0])/Math.max(dist(lm[3],lm[0]),.001);
   const thumb=thumbSpread>.52&&thumbReach>.96;
+  const shakaThumb=thumbSpread>.40&&thumbReach>.90;
   const thumbUp=thumb
     && lm[4].y < lm[3].y
     && lm[4].y < lm[2].y
@@ -201,16 +206,22 @@ function features(lm){
   const pinch=dist(lm[4],lm[8])/palm<.34;
   const openCount=[index,middle,ring,pinky].filter(Boolean).length;
 
+  // A fist is mostly about the four fingers being closed.
+  // Thumb position varies a lot between people, so don't require thumb=false.
+  const closedFist=openCount===0&&!pinch&&thumbSpread<.92;
+
   return {
     index,
     middle,
     ring,
     pinky,
     thumb,
+    shakaThumb,
     thumbUp,
     pinch,
     openPalm:openCount>=4,
-    fist:openCount===0&&!pinch&&!thumb
+    closedFist,
+    fist:closedFist
   };
 }
 
@@ -246,8 +257,6 @@ function commit(gesture,score,force=false){
 }
 
 function clearReaction(){
-  el.caption.textContent="";
-  el.caption.classList.remove("is-visible");
   el.memeImage.classList.remove("is-active","pop");
   el.memeImage.removeAttribute("src");
   el.memeVideo.pause();
@@ -257,9 +266,6 @@ function clearReaction(){
 }
 
 function showMeme(meme){
-  el.caption.textContent=meme.label || "";
-  el.caption.classList.toggle("is-visible", Boolean(meme.label));
-
   el.memeImage.classList.remove("is-active","pop");
   el.memeVideo.classList.remove("is-active","pop");
   el.memeVideo.pause();
