@@ -1,8 +1,8 @@
 {
   "defaultGesture": "shaka",
-  "holdFrames": 4,
+  "holdFrames": 2,
   "cooldownMs": 650,
-  "minScore": 0.55,
+  "minScore": 0.45,
   "memes": [
     {"id":"gap_yoq","label":"Gap yo‘q!","gesture":"shaka","image":"./assets/memes/gap-yoq.svg"},
     {"id":"zor_ku","label":"Zo‘r-ku!","gesture":"rock","image":"./assets/memes/zor-ku.svg"},
