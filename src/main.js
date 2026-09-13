@@ -1,5 +1,5 @@
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
-const WASM_URL = "../node_modules/@mediapipe/tasks-vision/wasm";
+const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm";
 
 const el = {
   video: document.querySelector("#camera"),
@@ -44,26 +44,41 @@ async function init(){
       "../node_modules/@mediapipe/tasks-vision/vision_bundle.mjs"
     );
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-    const options = (delegate) => ({
-      baseOptions:{modelAssetPath:MODEL_URL,delegate},
+
+    const common = {
       runningMode:"VIDEO",
       numHands:2,
       minHandDetectionConfidence:.35,
       minHandPresenceConfidence:.35,
       minTrackingConfidence:.4
-    });
+    };
 
     try{
-      landmarker = await HandLandmarker.createFromOptions(vision,options("GPU"));
+      landmarker = await HandLandmarker.createFromOptions(vision,{
+        ...common,
+        baseOptions:{
+          modelAssetPath:MODEL_URL,
+          delegate:"GPU"
+        }
+      });
       el.status.textContent = "Tayyor · GPU";
     }catch(gpuError){
       console.warn("GPU delegate ishlamadi, CPU ga o'tildi:", gpuError);
-      landmarker = await HandLandmarker.createFromOptions(vision,options("CPU"));
+
+      landmarker = await HandLandmarker.createFromOptions(vision,{
+        ...common,
+        baseOptions:{
+          modelAssetPath:MODEL_URL
+        }
+      });
+
       el.status.textContent = "Tayyor · CPU";
     }
   }catch(err){
     console.error("MediaPipe error:", err);
-    el.status.textContent = "Kamera ishlayapti · model xatosi";
+    const message = err?.message || String(err);
+    el.status.textContent = "Model xatosi";
+    el.hint.textContent = "MediaPipe: " + message.slice(0, 120);
   }
 }
 
