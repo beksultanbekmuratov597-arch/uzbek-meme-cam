@@ -4,14 +4,75 @@
   "cooldownMs": 650,
   "minScore": 0.45,
   "memes": [
-    {"id":"gap_yoq","label":"Gap yo‘q!","gesture":"shaka","image":"./assets/memes/gap-yoq.svg"},
-    {"id":"zor_ku","label":"Zo‘r-ku!","gesture":"rock","image":"./assets/memes/zor-ku.svg"},
-    {"id":"sal_qoldi","label":"Sal qoldi","gesture":"pinch","image":"./assets/memes/sal-qoldi.svg"},
-    {"id":"voy_dod","label":"Voy dod...","gesture":"open_palm","image":"./assets/memes/voy-dod.svg"},
-    {"id":"boldi_endi","label":"Bo‘ldi endi!","gesture":"double_fist","image":"./assets/memes/boldi-endi.svg"},
-    {"id":"tinchlik","label":"Tinchlik ✌","gesture":"peace","image":"./assets/memes/tinchlik.svg"},
-    {"id":"boldi","label":"Bo‘ldi!","gesture":"fist","image":"./assets/memes/boldi.svg"},
-    {"id":"ana_u","label":"Ana u!","gesture":"point","image":"./assets/memes/ana-u.svg"},
-    {"id":"zor_thumb","label":"Zo‘r!","gesture":"thumbs_up","image":"./assets/memes/zor.svg"}
+    {
+      "id": "gap_yoq",
+      "label": "Gap yo‘q!",
+      "gesture": "shaka",
+      "image": "./assets/memes/gap-yoq.svg",
+      "video": "./assets/memes/shaka.webm"
+    },
+    {
+      "id": "zor_ku",
+      "label": "Zo‘r-ku!",
+      "gesture": "rock",
+      "image": "./assets/memes/zor-ku.svg",
+      "video": "./assets/memes/rock.webm"
+    },
+    {
+      "id": "sal_qoldi",
+      "label": "Sal qoldi",
+      "gesture": "pinch",
+      "image": "./assets/memes/sal-qoldi.svg",
+      "video": "./assets/memes/pinch.webm"
+    },
+    {
+      "id": "voy_dod",
+      "label": "Voy dod...",
+      "gesture": "open_palm",
+      "image": "./assets/memes/voy-dod.svg",
+      "video": "./assets/memes/open_palm.webm"
+    },
+    {
+      "id": "boldi_endi",
+      "label": "Bo‘ldi endi!",
+      "gesture": "double_fist",
+      "image": "./assets/memes/boldi-endi.svg",
+      "video": "./assets/memes/double_fist.webm"
+    },
+    {
+      "id": "tinchlik",
+      "label": "Tinchlik ✌",
+      "gesture": "peace",
+      "image": "./assets/memes/tinchlik.svg",
+      "video": "./assets/memes/peace.webm"
+    },
+    {
+      "id": "boldi",
+      "label": "Bo‘ldi!",
+      "gesture": "fist",
+      "image": "./assets/memes/boldi.svg",
+      "video": "./assets/memes/fist.webm"
+    },
+    {
+      "id": "ana_u",
+      "label": "Ana u!",
+      "gesture": "point",
+      "image": "./assets/memes/ana-u.svg",
+      "video": "./assets/memes/point.webm"
+    },
+    {
+      "id": "zor_thumb",
+      "label": "Zo‘r!",
+      "gesture": "thumbs_up",
+      "image": "./assets/memes/zor.svg",
+      "video": "./assets/memes/thumbs_up.webm"
+    },
+    {
+      "id": "palms_up",
+      "label": "Mana 🤲",
+      "gesture": "palms_up",
+      "video": "./assets/memes/palms_up.webm",
+      "image": "./assets/memes/gap-yoq.svg"
+    }
   ]
 }
