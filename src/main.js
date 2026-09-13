@@ -1,5 +1,7 @@
+const MP_VERSION = "0.10.22-rc.20250304";
+const MP_MODULE_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/+esm`;
+const WASM_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VERSION}/wasm`;
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
-const WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm";
 
 const el = {
   video: document.querySelector("#camera"),
@@ -42,9 +44,7 @@ async function init(){
   try{
     el.status.textContent = "1/3 · MediaPipe JS yuklanmoqda…";
 
-    const { FilesetResolver, HandLandmarker } = await import(
-      "../node_modules/@mediapipe/tasks-vision/vision_bundle.mjs"
-    );
+    const { FilesetResolver, HandLandmarker } = await import(MP_MODULE_URL);
 
     el.status.textContent = "2/3 · WASM yuklanmoqda…";
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
