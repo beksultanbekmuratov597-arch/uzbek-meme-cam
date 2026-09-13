@@ -152,15 +152,26 @@ function loop(now){
 }
 
 function classify(hands){
-  if(hands.length>=2){
-    const a=features(hands[0]);
-    const b=features(hands[1]);
-    if(a.closedFist&&b.closedFist) return {gesture:"double_fist",score:.98};
-    if(a.openPalm&&b.openPalm) return {gesture:"palms_up",score:.95};
+  if(!hands.length) return null;
+
+  const allFeatures=hands.map(features);
+
+  if(allFeatures.length>=2){
+    const [a,b]=allFeatures;
+
+    // Two open hands should still win as palms_up.
+    if(a.openPalm&&b.openPalm) return {gesture:"palms_up",score:.97};
+
+    // MediaPipe can mark one curled finger as slightly extended depending
+    // on camera angle. For a two-fist pose, allow up to one false-positive
+    // extended finger per hand and ignore thumb/index proximity.
+    const aFistLike=a.openCount<=1&&!a.openPalm;
+    const bFistLike=b.openCount<=1&&!b.openPalm;
+
+    if(aFistLike&&bFistLike) return {gesture:"double_fist",score:.99};
   }
 
-  if(!hands.length) return null;
-  const f=features(hands[0]);
+  const f=allFeatures[0];
 
   if(f.pinch) return {gesture:"pinch",score:.97};
 
@@ -219,6 +230,7 @@ function features(lm){
     shakaThumb,
     thumbUp,
     pinch,
+    openCount,
     openPalm:openCount>=4,
     closedFist,
     fist:closedFist
