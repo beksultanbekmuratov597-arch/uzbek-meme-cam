@@ -1,8 +1,3 @@
-import {
-  FilesetResolver,
-  HandLandmarker
-} from "../node_modules/@mediapipe/tasks-vision/vision_bundle.mjs";
-
 const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
 const WASM_URL = "../node_modules/@mediapipe/tasks-vision/wasm";
 
@@ -45,6 +40,9 @@ async function init(){
   requestAnimationFrame(loop);
 
   try{
+    const { FilesetResolver, HandLandmarker } = await import(
+      "../node_modules/@mediapipe/tasks-vision/vision_bundle.mjs"
+    );
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
     landmarker = await HandLandmarker.createFromOptions(vision,{
       baseOptions:{modelAssetPath:MODEL_URL,delegate:"GPU"},
