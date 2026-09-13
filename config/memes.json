@@ -11,6 +11,7 @@
     {"id":"boldi_endi","label":"Bo‘ldi endi!","gesture":"double_fist","image":"./assets/memes/boldi-endi.svg"},
     {"id":"tinchlik","label":"Tinchlik ✌","gesture":"peace","image":"./assets/memes/tinchlik.svg"},
     {"id":"boldi","label":"Bo‘ldi!","gesture":"fist","image":"./assets/memes/boldi.svg"},
-    {"id":"ana_u","label":"Ana u!","gesture":"point","image":"./assets/memes/ana-u.svg"}
+    {"id":"ana_u","label":"Ana u!","gesture":"point","image":"./assets/memes/ana-u.svg"},
+    {"id":"zor_thumb","label":"Zo‘r!","gesture":"thumbs_up","image":"./assets/memes/zor.svg"}
   ]
 }
