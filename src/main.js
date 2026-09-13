@@ -161,6 +161,7 @@ function classify(hands){
   const f=features(hands[0]);
 
   if(f.pinch) return {gesture:"pinch",score:.97};
+  if(f.thumbUp) return {gesture:"thumbs_up",score:.96};
   if(f.index&&f.middle&&!f.ring&&!f.pinky) return {gesture:"peace",score:.95};
   if(f.index&&!f.middle&&!f.ring&&!f.pinky) return {gesture:"point",score:.94};
   if(f.index&&!f.middle&&!f.ring&&f.pinky) return {gesture:"rock",score:.93};
@@ -189,6 +190,10 @@ function features(lm){
   const thumbSpread=dist(lm[4],lm[5])/palm;
   const thumbReach=dist(lm[4],lm[0])/Math.max(dist(lm[3],lm[0]),.001);
   const thumb=thumbSpread>.52&&thumbReach>.96;
+  const thumbUp=thumb
+    && lm[4].y < lm[3].y
+    && lm[4].y < lm[2].y
+    && lm[4].y < lm[0].y - palm*.12;
 
   const pinch=dist(lm[4],lm[8])/palm<.34;
   const openCount=[index,middle,ring,pinky].filter(Boolean).length;
@@ -199,9 +204,10 @@ function features(lm){
     ring,
     pinky,
     thumb,
+    thumbUp,
     pinch,
     openPalm:openCount>=4,
-    fist:openCount===0&&!pinch
+    fist:openCount===0&&!pinch&&!thumb
   };
 }
 
