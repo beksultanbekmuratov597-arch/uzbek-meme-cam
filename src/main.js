@@ -44,15 +44,23 @@ async function init(){
       "../node_modules/@mediapipe/tasks-vision/vision_bundle.mjs"
     );
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
-    landmarker = await HandLandmarker.createFromOptions(vision,{
-      baseOptions:{modelAssetPath:MODEL_URL,delegate:"GPU"},
+    const options = (delegate) => ({
+      baseOptions:{modelAssetPath:MODEL_URL,delegate},
       runningMode:"VIDEO",
       numHands:2,
-      minHandDetectionConfidence:.5,
-      minHandPresenceConfidence:.5,
-      minTrackingConfidence:.5
+      minHandDetectionConfidence:.35,
+      minHandPresenceConfidence:.35,
+      minTrackingConfidence:.4
     });
-    el.status.textContent = "Tayyor";
+
+    try{
+      landmarker = await HandLandmarker.createFromOptions(vision,options("GPU"));
+      el.status.textContent = "Tayyor · GPU";
+    }catch(gpuError){
+      console.warn("GPU delegate ishlamadi, CPU ga o'tildi:", gpuError);
+      landmarker = await HandLandmarker.createFromOptions(vision,options("CPU"));
+      el.status.textContent = "Tayyor · CPU";
+    }
   }catch(err){
     console.error("MediaPipe error:", err);
     el.status.textContent = "Kamera ishlayapti · model xatosi";
@@ -85,41 +93,88 @@ function loop(now){
   resize();
   if(!demo && landmarker && el.video.readyState>=2 && el.video.currentTime!==lastVideoTime){
     lastVideoTime=el.video.currentTime;
-    const result=landmarker.detectForVideo(el.video,now);
-    draw(result.landmarks || []);
-    const detected=classify(result.landmarks || []);
-    if(detected) stabilize(detected.gesture,detected.score);
-    else stabilize(null,0);
+
+    try{
+      const result=landmarker.detectForVideo(el.video,now);
+      const hands=result.landmarks || [];
+      draw(hands);
+
+      if(!hands.length){
+        el.status.textContent="Model ishlayapti · qo‘l topilmadi";
+        stabilize(null,0);
+      }else{
+        const detected=classify(hands);
+        if(detected){
+          el.status.textContent="Qo‘l topildi · "+detected.gesture;
+          stabilize(detected.gesture,detected.score);
+        }else{
+          el.status.textContent="Qo‘l topildi · gesture noma’lum";
+          el.gesture.textContent="hand";
+          el.confidence.textContent="—";
+          stabilize(null,0);
+        }
+      }
+    }catch(err){
+      console.error("detectForVideo error:",err);
+      el.status.textContent="Recognition xatosi";
+    }
   }
   requestAnimationFrame(loop);
 }
 
 function classify(hands){
   if(hands.length>=2){
-    const a=features(hands[0]), b=features(hands[1]);
-    if(a.fist&&b.fist) return {gesture:"double_fist",score:.92};
+    const a=features(hands[0]);
+    const b=features(hands[1]);
+    if(a.fist&&b.fist) return {gesture:"double_fist",score:.96};
   }
+
   if(!hands.length) return null;
   const f=features(hands[0]);
 
-  if(f.pinch) return {gesture:"pinch",score:.96};
-  if(f.index&&f.middle&&!f.ring&&!f.pinky) return {gesture:"peace",score:.92};
-  if(f.index&&!f.middle&&!f.ring&&!f.pinky) return {gesture:"point",score:.9};
-  if(f.index&&!f.middle&&!f.ring&&f.pinky) return {gesture:"rock",score:.88};
-  if(!f.index&&!f.middle&&!f.ring&&!f.pinky&&f.thumb) return {gesture:"shaka",score:.84};
-  if(f.openPalm) return {gesture:"open_palm",score:.82};
-  if(f.fist) return {gesture:"fist",score:.9};
+  if(f.pinch) return {gesture:"pinch",score:.97};
+  if(f.index&&f.middle&&!f.ring&&!f.pinky) return {gesture:"peace",score:.95};
+  if(f.index&&!f.middle&&!f.ring&&!f.pinky) return {gesture:"point",score:.94};
+  if(f.index&&!f.middle&&!f.ring&&f.pinky) return {gesture:"rock",score:.93};
+  if(!f.index&&!f.middle&&!f.ring&&f.pinky&&f.thumb) return {gesture:"shaka",score:.93};
+  if(f.openPalm) return {gesture:"open_palm",score:.92};
+  if(f.fist) return {gesture:"fist",score:.94};
+
   return null;
 }
 
 function features(lm){
   const palm=Math.max(dist(lm[0],lm[9]),.001);
-  const ext=(tip,pip,mcp)=>dist(lm[tip],lm[0])>dist(lm[pip],lm[0])*1.05 && dist(lm[tip],lm[mcp])>palm*.55;
-  const index=ext(8,6,5), middle=ext(12,10,9), ring=ext(16,14,13), pinky=ext(20,18,17);
-  const thumb=dist(lm[4],lm[5])>palm*.55;
-  const pinch=dist(lm[4],lm[8])<palm*.38;
-  const count=[index,middle,ring,pinky].filter(Boolean).length;
-  return {index,middle,ring,pinky,thumb,pinch,openPalm:count===4,fist:count===0&&!pinch};
+
+  const ext=(tip,pip,mcp)=>{
+    const straight=jointAngle(lm[mcp],lm[pip],lm[tip])>145;
+    const awayFromPalm=dist(lm[tip],lm[0])>dist(lm[pip],lm[0])*1.015;
+    const length=dist(lm[tip],lm[mcp])>palm*.48;
+    return straight&&awayFromPalm&&length;
+  };
+
+  const index=ext(8,6,5);
+  const middle=ext(12,10,9);
+  const ring=ext(16,14,13);
+  const pinky=ext(20,18,17);
+
+  const thumbSpread=dist(lm[4],lm[5])/palm;
+  const thumbReach=dist(lm[4],lm[0])/Math.max(dist(lm[3],lm[0]),.001);
+  const thumb=thumbSpread>.52&&thumbReach>.96;
+
+  const pinch=dist(lm[4],lm[8])/palm<.34;
+  const openCount=[index,middle,ring,pinky].filter(Boolean).length;
+
+  return {
+    index,
+    middle,
+    ring,
+    pinky,
+    thumb,
+    pinch,
+    openPalm:openCount>=4,
+    fist:openCount===0&&!pinch
+  };
 }
 
 function stabilize(gesture,score){
@@ -165,6 +220,15 @@ function draw(hands){
 function resize(){
   const r=el.overlay.getBoundingClientRect(), d=devicePixelRatio||1, w=Math.round(r.width*d), h=Math.round(r.height*d);
   if(el.overlay.width!==w||el.overlay.height!==h){el.overlay.width=w;el.overlay.height=h;}
+}
+
+function jointAngle(a,b,c){
+  const ab={x:a.x-b.x,y:a.y-b.y,z:(a.z||0)-(b.z||0)};
+  const cb={x:c.x-b.x,y:c.y-b.y,z:(c.z||0)-(b.z||0)};
+  const dot=ab.x*cb.x+ab.y*cb.y+ab.z*cb.z;
+  const mag=Math.max(Math.hypot(ab.x,ab.y,ab.z)*Math.hypot(cb.x,cb.y,cb.z),.000001);
+  const cos=Math.max(-1,Math.min(1,dot/mag));
+  return Math.acos(cos)*180/Math.PI;
 }
 
 function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y,(a.z||0)-(b.z||0));}
