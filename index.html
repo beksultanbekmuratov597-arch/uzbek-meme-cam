@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Uzbek Meme Cam</title>
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <main class="app">
+    <header>
+      <div>
+        <span class="eyebrow">UZBEK MEME CAM</span>
+        <h1>Qo‘l ishorasi → o‘zbekcha reaksiya</h1>
+      </div>
+      <div id="status" class="status">Yuklanmoqda…</div>
+    </header>
+
+    <section class="grid">
+      <div class="panel camera-panel">
+        <div class="panel-title">KAMERA</div>
+        <div class="stage">
+          <video id="camera" autoplay muted playsinline></video>
+          <canvas id="overlay"></canvas>
+          <div id="cameraHint" class="hint">Kameraga qo‘lingizni ko‘rsating</div>
+        </div>
+        <div class="meters">
+          <span>Gesture: <b id="gesture">—</b></span>
+          <span>Confidence: <b id="confidence">0%</b></span>
+        </div>
+      </div>
+
+      <div class="panel reaction-panel">
+        <div class="panel-title">REAKSIYA</div>
+        <div class="meme-wrap">
+          <img id="meme" alt="Uzbek meme reaction" />
+          <div class="caption" id="caption">Gap yo‘q!</div>
+        </div>
+        <div class="help">
+          <span>1–8: test</span>
+          <span>D: demo</span>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
