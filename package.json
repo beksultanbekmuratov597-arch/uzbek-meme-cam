@@ -1,0 +1,16 @@
+{
+  "name": "uzbek-meme-cam",
+  "version": "0.1.0",
+  "description": "Uzbek gesture reaction camera",
+  "main": "electron-main.js",
+  "scripts": {
+    "start": "python3 -m http.server 5173",
+    "app": "electron ."
+  },
+  "dependencies": {
+    "@mediapipe/tasks-vision": "0.10.22"
+  },
+  "devDependencies": {
+    "electron": "41.7.1"
+  }
+}
