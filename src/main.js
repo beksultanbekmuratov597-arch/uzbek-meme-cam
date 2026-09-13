@@ -6,7 +6,8 @@ const MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmark
 const el = {
   video: document.querySelector("#camera"),
   overlay: document.querySelector("#overlay"),
-  meme: document.querySelector("#meme"),
+  memeImage: document.querySelector("#memeImage"),
+  memeVideo: document.querySelector("#memeVideo"),
   caption: document.querySelector("#caption"),
   status: document.querySelector("#status"),
   gesture: document.querySelector("#gesture"),
@@ -105,8 +106,8 @@ async function startCamera(){
 function bindKeys(){
   document.addEventListener("keydown",e=>{
     if(e.key.toLowerCase()==="d"){demo=!demo;el.status.textContent=demo?"Demo rejimi":"Tayyor"; if(demo) runDemo();}
-    const i=Number(e.key)-1;
-    if(Number.isInteger(i)&&config?.memes[i]) showMeme(config.memes[i],true);
+    const keyMap = e.key === "0" ? 9 : Number(e.key)-1;
+    if(Number.isInteger(keyMap)&&config?.memes[keyMap]) showMeme(config.memes[keyMap],true);
   });
 }
 
@@ -155,6 +156,7 @@ function classify(hands){
     const a=features(hands[0]);
     const b=features(hands[1]);
     if(a.fist&&b.fist) return {gesture:"double_fist",score:.96};
+    if(a.openPalm&&b.openPalm) return {gesture:"palms_up",score:.95};
   }
 
   if(!hands.length) return null;
@@ -228,11 +230,35 @@ function commit(gesture,score,force=false){
 }
 
 function showMeme(meme){
-  el.meme.src=meme.image;
-  el.caption.textContent=meme.label;
-  el.meme.classList.remove("pop");
-  void el.meme.offsetWidth;
-  el.meme.classList.add("pop");
+  el.caption.textContent=meme.label || "";
+
+  el.memeImage.classList.remove("is-active","pop");
+  el.memeVideo.classList.remove("is-active","pop");
+  el.memeVideo.pause();
+  el.memeVideo.removeAttribute("src");
+
+  if(meme.video){
+    el.memeVideo.src=meme.video;
+    el.memeVideo.classList.add("is-active");
+    el.memeVideo.currentTime=0;
+    el.memeVideo.play().catch(()=>{});
+    void el.memeVideo.offsetWidth;
+    el.memeVideo.classList.add("pop");
+
+    el.memeVideo.onerror=()=>{
+      el.memeVideo.classList.remove("is-active");
+      if(meme.image){
+        el.memeImage.src=meme.image;
+        el.memeImage.classList.add("is-active");
+      }
+    };
+    return;
+  }
+
+  el.memeImage.src=meme.image;
+  el.memeImage.classList.add("is-active");
+  void el.memeImage.offsetWidth;
+  el.memeImage.classList.add("pop");
 }
 
 function draw(hands){
