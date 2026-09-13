@@ -31,7 +31,20 @@ async function init(){
   bindKeys();
 
   try{
-    el.status.textContent = "Model yuklanmoqda…";
+    el.status.textContent = "Kamera ruxsati kutilmoqda…";
+    await startCamera();
+    el.status.textContent = "Kamera ulandi · model yuklanmoqda…";
+  }catch(err){
+    console.error("Camera error:", err);
+    el.status.textContent = "Kamera ruxsati kerak";
+    el.hint.textContent = "Safari kameraga ruxsat so‘rashi kerak";
+    requestAnimationFrame(loop);
+    return;
+  }
+
+  requestAnimationFrame(loop);
+
+  try{
     const vision = await FilesetResolver.forVisionTasks(WASM_URL);
     landmarker = await HandLandmarker.createFromOptions(vision,{
       baseOptions:{modelAssetPath:MODEL_URL,delegate:"GPU"},
@@ -41,12 +54,10 @@ async function init(){
       minHandPresenceConfidence:.5,
       minTrackingConfidence:.5
     });
-    await startCamera();
     el.status.textContent = "Tayyor";
-    requestAnimationFrame(loop);
   }catch(err){
-    console.error(err);
-    el.status.textContent = "Xato — D tugmasi bilan demo";
+    console.error("MediaPipe error:", err);
+    el.status.textContent = "Kamera ishlayapti · model xatosi";
   }
 }
 
