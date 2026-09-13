@@ -12,7 +12,8 @@ const el = {
   status: document.querySelector("#status"),
   gesture: document.querySelector("#gesture"),
   confidence: document.querySelector("#confidence"),
-  hint: document.querySelector("#cameraHint")
+  hint: document.querySelector("#cameraHint"),
+  tutorialChips: [...document.querySelectorAll(".gesture-chip")]
 };
 
 const ctx = el.overlay.getContext("2d");
@@ -216,8 +217,23 @@ function features(lm){
 function stabilize(gesture,score){
   el.gesture.textContent=gesture || "—";
   el.confidence.textContent=Math.round(score*100)+"%";
-  if(gesture===stableGesture) stableFrames++; else {stableGesture=gesture;stableFrames=1;}
-  if(gesture && stableFrames>=config.holdFrames && gesture!==activeGesture) commit(gesture,score);
+  updateTutorial(gesture);
+
+  if(gesture===stableGesture) stableFrames++;
+  else {
+    stableGesture=gesture;
+    stableFrames=1;
+  }
+
+  if(gesture && stableFrames>=config.holdFrames && gesture!==activeGesture){
+    commit(gesture,score);
+  }
+}
+
+function updateTutorial(gesture){
+  el.tutorialChips.forEach((chip)=>{
+    chip.classList.toggle("is-active", chip.dataset.gesture===gesture);
+  });
 }
 
 function commit(gesture,score,force=false){
