@@ -1,0 +1,16 @@
+{
+  "defaultGesture": "shaka",
+  "holdFrames": 4,
+  "cooldownMs": 650,
+  "minScore": 0.55,
+  "memes": [
+    {"id":"gap_yoq","label":"Gap yo‘q!","gesture":"shaka","image":"./assets/memes/gap-yoq.svg"},
+    {"id":"zor_ku","label":"Zo‘r-ku!","gesture":"rock","image":"./assets/memes/zor-ku.svg"},
+    {"id":"sal_qoldi","label":"Sal qoldi","gesture":"pinch","image":"./assets/memes/sal-qoldi.svg"},
+    {"id":"voy_dod","label":"Voy dod...","gesture":"open_palm","image":"./assets/memes/voy-dod.svg"},
+    {"id":"boldi_endi","label":"Bo‘ldi endi!","gesture":"double_fist","image":"./assets/memes/boldi-endi.svg"},
+    {"id":"tinchlik","label":"Tinchlik ✌","gesture":"peace","image":"./assets/memes/tinchlik.svg"},
+    {"id":"boldi","label":"Bo‘ldi!","gesture":"fist","image":"./assets/memes/boldi.svg"},
+    {"id":"ana_u","label":"Ana u!","gesture":"point","image":"./assets/memes/ana-u.svg"}
+  ]
+}
